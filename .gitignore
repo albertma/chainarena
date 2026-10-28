@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# node
+node_modules/
+package-lock.json
+yarn.lock
+
+# secrets
+.env
+.env.*
+
+# foundry build artifacts are ignored by contracts/.gitignore (out/, cache/, broadcast/)
