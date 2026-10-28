@@ -7,18 +7,22 @@
 ```bash
 # 1. 编译合约（需要 out/ 里的 ERC1967Proxy 字节码与 broadcast 部署记录）
 cd contracts && forge build && make demo-local
-
-# 2. 依赖
-pip3 install -r client-demo/requirements.txt
 ```
 
-## 运行
+## 运行（uv，推荐）
 
 ```bash
-python3 client-demo/chainarena_client.py                # 全流程（7 步）
-python3 client-demo/chainarena_client.py --no-deploy    # 只读：生成密钥 + 本地算址 + 对账
-python3 client-demo/chainarena_client.py --fresh        # 换新 passkey → 地址必变
-python3 client-demo/chainarena_client.py --user-salt 1  # 同钥开小号（高级设置语义）
+uv run chainarena_client.py                # 自动创建/复用 .venv + 锁定依赖（uv.lock）
+uv run chainarena_client.py --no-deploy    # 只读：生成密钥 + 本地算址 + 对账
+uv run chainarena_client.py --fresh        # 换新 passkey → 地址必变
+uv run chainarena_client.py --user-salt 1  # 同钥开小号（高级设置语义）
+```
+
+## 运行（pip，备用）
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python chainarena_client.py …
 ```
 
 ## 步骤 ↔ 设计文档映射

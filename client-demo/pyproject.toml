@@ -1,0 +1,8 @@
+[project]
+name = "chainarena-client"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "cryptography>=50.0.2",
+    "web3>=8.0.0",
+]
