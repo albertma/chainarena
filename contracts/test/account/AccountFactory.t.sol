@@ -132,6 +132,34 @@ contract AccountFactoryTest is Test {
     // ③ 幂等与 EntryPoint initCode 语义
     // ------------------------------------------------------------------
 
+    /// 调用者无关性：EntryPoint（或任何人）调 createAccount，地址与客户端预计算恒等
+    /// （CREATE2 地址只由 factory+salt+initCode 决定，与 msg.sender 无关）
+    function test_CreateAccount_CallerIndependent() public {
+        address expected = factory.getAddress(PKX, PKY, USER_SALT);
+
+        vm.prank(address(0xA11CE));
+        address byAlice = factory.createAccount(PKX, PKY, USER_SALT);
+        assertEq(byAlice, expected, "alice's deployment must match prediction");
+
+        vm.prank(address(0xB0B));
+        address byBob = factory.createAccount(PKX, PKY, USER_SALT); // 幂等路径
+        assertEq(byBob, expected, "bob's replay must return same account");
+    }
+
+    /// 账户自身守卫：经代理再次 initialize 必须 revert（防止恶意改写 owner 公钥）
+    function test_Proxy_DisallowsReinitialize() public {
+        SmartAccount account = SmartAccount(payable(factory.createAccount(PKX, PKY, USER_SALT)));
+
+        address attacker = makeAddr("attacker");
+        vm.prank(attacker);
+        vm.expectRevert(Initializable.InvalidInitialization.selector);
+        account.initialize(bytes32(uint256(0xdead)), bytes32(uint256(0xbeef)));
+
+        // 原公钥未被篡改
+        assertEq(account.pubKeyX(), PKX);
+        assertEq(account.pubKeyY(), PKY);
+    }
+
     /// 中断续跑根基：同参数再次 createAccount → 同地址、不 revert、不重复发事件
     function test_CreateAccount_IsIdempotent_NoDuplicateEvent() public {
         address first = factory.createAccount(PKX, PKY, USER_SALT);
